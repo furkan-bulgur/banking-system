@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-int timestwo(int num){
-    return num*2;
+int timesthree(int num){
+    return num*3;
 }
 
 int main(){
