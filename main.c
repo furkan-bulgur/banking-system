@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 int timesthree(int num){
+    printf("sa");
     return num*3;
 }
 
