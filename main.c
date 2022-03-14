@@ -1,13 +1,89 @@
 #include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
 
-int timesthree(int num){
-    printf("sa");
-    return num*3;
+#define cls printf("\e[1;1H\e[2J");
+
+struct Account{
+    int current_money;
+};
+
+struct Customer{
+    char *name;  // char[6] = Furkan  &char = F  printf("%s",name)
+    char *surname;
+    char *username;
+    char *password;
+    char *phone;
+    char *mail;
+    char *iban;
+    struct Account *account;
+};
+
+struct Customer* create_customer(){
+    struct Customer *new_customer = (struct Customer*)malloc(sizeof(struct Customer));
+    new_customer->name = (char*)malloc(30*sizeof(char));
+    new_customer->surname = (char*)malloc(30*sizeof(char));
+    new_customer->username = (char*)malloc(30*sizeof(char));
+    new_customer->password = (char*)malloc(30*sizeof(char));
+    return new_customer;
+
 }
 
+bool store_customer(struct Customer *customer){
+    
+}
+
+void run_login_screen(){
+    cls;
+    printf("Login screen.\n");
+}
+
+void run_signup_screen(){
+    cls;
+    struct Customer *customer = create_customer();
+    printf("Please enter your name.\n");
+    scanf("%s",customer->name);
+    printf("Please enter your surname.\n");
+    scanf("%s",customer->surname);
+    printf("Please enter your username.\n");
+    scanf("%s",customer->username);
+    printf("Please enter your password.\n");
+    scanf("%s",customer->password);
+    printf("Customer account has been successfully created.");
+
+
+}
+
+
+void run_initial_screen(){
+    bool invalid_input = false;
+    check:
+    cls;
+    if(invalid_input){
+        printf("1 - Login\n2 - Signup\n\nPlease enter a valid choice.\nChoose one: ");
+    }else{
+        printf("1 - Login\n2 - Signup\n\nChoose one: ");
+    }
+    int res; 
+    scanf("%d",&res);
+    switch (res)
+    {
+    case 1:
+        run_login_screen();
+        break;
+    case 2:
+        run_signup_screen();
+        break;
+    default:
+        invalid_input = true;
+        goto check;
+        break;
+    }
+}
+
+
 int main(){
-    printf("Hello World!\n");
-    printf("Num: %d\n", timestwo(3));
+    run_initial_screen();
     return 0;
 }
 
