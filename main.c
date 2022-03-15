@@ -37,18 +37,13 @@ struct Customer* create_customer(){
 void store_customer(struct Customer *customer){
     FILE *store;
     store = fopen("customers.txt","a");
+    fprintf(store,"%s , ",customer->username);
     fprintf(store,"\n%s , ",customer->name);
     fprintf(store,"%s , ",customer->surname);
-    fprintf(store,"%s , ",customer->username);
     fprintf(store,"%s , ",customer->mail);
     fprintf(store,"%s , ",customer->password);
     fprintf(store,"fo%d \n",customer->iban);
     fclose(store);
-}
-
-void run_login_screen(){
-    cls;
-    printf("Login screen.\n");
 }
 
 int random_iban(struct Customer *customer){
@@ -60,6 +55,20 @@ int random_iban(struct Customer *customer){
         return(number);
     }
 }
+
+void run_login_screen(){
+    cls;
+    char id[],password[];
+    printf("Please enter your username or mail address: ");
+    scanf("%s",&id);
+    printf("Please enter your password: ");
+    scanf("%s",&password);
+    FILE *check;
+    check = fopen("customers.txt","r");
+    fgetc()
+
+    }
+
 void run_signup_screen(){
     cls;
     struct Customer *customer = create_customer();
