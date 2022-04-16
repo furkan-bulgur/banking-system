@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 
-#define cls printf("\e[1;1H\e[2J");
+#define cls printf("\n");//printf("\e[1;1H\e[2J");
 
 struct Account{
     int current_money;
@@ -81,9 +81,35 @@ void store_customer(struct Customer *customer){
     fclose(store);
 }
 
+int check_login_info(char username[],char password[]){
+    FILE *checkInf;
+    int size=210,count=0;
+    char inf[size],piece[size];
+    if((checkInf = fopen("customers.txt","r"))!=NULL){
+        while (!feof(checkInf)){
+            while (fgets(inf,size,checkInf))
+            {
+                char *piece_;
+                piece_=strtok(inf,"");
+                if(strlen(piece_)!=1){
+                    piece[count]=*piece_;
+                    printf("count: %d\npiece: %sarray: %s\n\n",count,piece_,piece);
+                    count++;
+                }
+            }
+        }
+    }
+    //printf("username: %s \n password: ",piece);
+    fclose(checkInf);
+}
+
 void run_login_screen(){
     cls;
-    printf("***Log In Screen***");
+    char username[30],password[30];
+    printf("***Log In Screen***\n");
+    printf("Username: \n");scanf("%s",&username);
+    printf("Password: \n");scanf("%s",&password);
+    check_login_info(username,password);
     }
 
 void run_signup_screen(){
