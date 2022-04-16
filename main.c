@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 
-#define cls printf("silindi........\n")//printf("\e[1;1H\e[2J");
+#define cls printf("\e[1;1H\e[2J");
 
 struct Account{
     int current_money;
@@ -33,14 +33,40 @@ struct Customer* create_customer(){
 
 }
 
-char random_iban(struct Customer *customer){
+int check_information(char information[], int check){
+    //1-nickname 2-mail 3-iban
+    FILE *checkInf;
+    char inf[30];
+    if((checkInf = fopen("customers.txt","r"))!=NULL){
+        while (!feof(checkInf))
+        {   
+            switch(check){
+                case 1: //nickname check
+                fscanf(checkInf,"%s%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s\n",inf);
+                if(strcmp(inf,information)== 0)return 0;break;
+                case 2: //mail check
+                fscanf(checkInf,"%*s%*s%*s%*s%*s%*s%s%*s%*s%*s%*s",inf);
+                if(strcmp(inf,information)== 0)return 0;break;
+                case 3: //iban check
+                fscanf(checkInf,"%*s%*s%*s%*s%*s%*s%*s%*s%*s%*s%s",inf);
+                if(strcmp(inf,information)== 0)return 0;break;
+            }
+        }
+        return 1;
+    }
+    fclose(checkInf);
+}
+
+void random_iban(struct Customer *customer, char iban[]){
+    re_iban:
     int number;
-	char string_of_number[8],iban[8]="fo";
     srand(time(0));
     number = rand()%1000000;
-    sprintf(string_of_number, "%d", number);
-    strcat(iban,string_of_number);
-    return iban;
+    sprintf(iban, "fo%d", number);
+    if (check_information(iban,3)==0){
+        goto re_iban;
+    }
+
 }
 
 void store_customer(struct Customer *customer){
@@ -60,51 +86,45 @@ void run_login_screen(){
     printf("***Log In Screen***");
     }
 
-bool check_nick(char nickname[]){
-    char nick[30];
-    int i=0;
-    FILE *checkNick;
-    if((checkNick = fopen("customers.txt","r"))!=NULL){
-        while (!feof(checkNick))
-        {
-            fscanf(checkNick,"%s",&nick);
-            if(nick==nickname)return 0;
-        }
-        return 1;
-    }
-    else printf("File is empty.");
-    return 0;
-
-    fclose(checkNick);
-
-}
-
 void run_signup_screen(){
     cls;
+    char iban_[8];
     struct Customer *customer = create_customer();
-    printf("Please enter your name.\n");
+
+    printf("\nPlease enter your name:  ");
     scanf("%s",customer->name);
-    printf("Please enter your surname.\n");
+
+    printf("\nPlease enter your surname:  ");
     scanf("%s",customer->surname);
-    re_election:
-    printf("Please enter your username.\n");
+
+    re_username:
+    printf("\nPlease enter your username:  ");
     scanf("%s",customer->username);
 
-    if (check_nick(customer->username)==0){
-        printf("You can't use this username.\nPlease pick new one.");
-        goto re_election;
+    if (check_information(customer->username,1)==0){
+        printf("You can't use this username [%s].\nPlease pick new one.",customer->username);
+        goto re_username;
     }
 
-    printf("Please enter your mail address.\n");
+    re_mail:
+    printf("\nPlease enter your mail address:  ");
     scanf("%s",customer->mail);
-    printf("Please enter your password.\n");
+
+    if (check_information(customer->mail,2)==0){
+        printf("You can't use this mail [%s].\nPlease pick new one.",customer->mail);
+        goto re_mail;
+    }
+
+    printf("\nPlease enter your password:  ");
     scanf("%s",customer->password);
-    customer->iban = random_iban(customer);
-    printf("Your special number is :%s \n",customer->iban);
-    printf("Customer account has been successfully created.");
+
+    random_iban(customer,iban_);
+    customer->iban = iban_;
+    printf("\nYour special number is:  %s \n",iban_);
+
+    printf("\nCustomer account has been successfully created.\n\n*** WELCOME %s ***",customer->name);
     store_customer(customer);
 }
-
 
 void run_initial_screen(){
     bool invalid_input = false;
@@ -131,7 +151,6 @@ void run_initial_screen(){
         break;
     }
 }
-
 
 int main(){
     run_initial_screen();
