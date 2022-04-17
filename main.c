@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 
-#define cls printf("\n");//printf("\e[1;1H\e[2J");
+#define cls printf("\n");
 
 struct Account{
     int current_money;
@@ -83,23 +83,32 @@ void store_customer(struct Customer *customer){
 
 int check_login_info(char username[],char password[]){
     FILE *checkInf;
-    int size=210,count=0;
-    char inf[size],piece[size];
+    int size=210;
+    char inf[size],*piece[30];
     if((checkInf = fopen("customers.txt","r"))!=NULL){
         while (!feof(checkInf)){
-            while (fgets(inf,size,checkInf))
-            {
+            while (fgets(inf,size,checkInf)){
                 char *piece_;
-                piece_=strtok(inf,"");
+                piece_=strtok(inf," ");
                 if(strlen(piece_)!=1){
-                    piece[count]=*piece_;
-                    printf("count: %d\npiece: %sarray: %s\n\n",count,piece_,piece);
-                    count++;
+                    piece[0]=piece_;
+                    if(strcmp(piece_,username)==0){
+                        int count=0;
+                        while( piece_ != NULL ) {
+                        piece_ = strtok(NULL, " ");
+                        if((count==7)&&(strcmp(piece_,password)==0)){
+                            //printf("Nickname:%s and Password:%s match up.",username,password);
+                            return 1;
+                            }
+                        count++;
+                        }
+                    }
                 }
             }
         }
     }
-    //printf("username: %s \n password: ",piece);
+    printf("\nUSERNAME OR PASSWORD IS WRONG!!!\n");
+    return 0;
     fclose(checkInf);
 }
 
@@ -109,8 +118,14 @@ void run_login_screen(){
     printf("***Log In Screen***\n");
     printf("Username: \n");scanf("%s",&username);
     printf("Password: \n");scanf("%s",&password);
-    check_login_info(username,password);
+    if(check_login_info(username,password)==1){
+        printf("\n**** %s ***\n",username);
     }
+    else {
+        sleep(2);
+        main();
+    }
+}
 
 void run_signup_screen(){
     cls;
