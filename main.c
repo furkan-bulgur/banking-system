@@ -3,11 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-#define cls printf("\n");
+#define cls printf("\e[1;1H\e[2J");
+//#define cls printf("\n delete \n");
 
 struct Account{
-    int current_money;
+    char *iban;
+    float *current_money;
 };
 
 struct Customer{
@@ -21,6 +24,13 @@ struct Customer{
     struct Account *account;
 };
 
+struct Account* create_account(){
+    struct Account *new_account = (struct Account*)malloc(sizeof(struct Account));
+    new_account->iban = (char*)malloc(30*sizeof(char));
+    new_account->current_money = (float*)malloc(30*sizeof(float));
+    return new_account;
+}
+
 struct Customer* create_customer(){
     struct Customer *new_customer = (struct Customer*)malloc(sizeof(struct Customer));
     new_customer->name = (char*)malloc(30*sizeof(char));
@@ -30,7 +40,6 @@ struct Customer* create_customer(){
     new_customer->password = (char*)malloc(30*sizeof(char));
     new_customer->iban = (char*)malloc(30*sizeof(char));
     return new_customer;
-
 }
 
 int check_information(char information[], int check){
@@ -77,36 +86,35 @@ void store_customer(struct Customer *customer){
     fprintf(store,"%s , ",customer->surname);
     fprintf(store,"%s , ",customer->mail);
     fprintf(store,"%s , ",customer->password);
-    fprintf(store,"%s \n",customer->iban);
+    fprintf(store,"%s\n",customer->iban);
     fclose(store);
 }
 
 int check_login_info(char username[],char password[]){
     FILE *checkInf;
     int size=210;
-    char inf[size],*piece[30];
+    char inf[size];
     if((checkInf = fopen("customers.txt","r"))!=NULL){
         while (!feof(checkInf)){
             while (fgets(inf,size,checkInf)){
                 char *piece_;
                 piece_=strtok(inf," ");
                 if(strlen(piece_)!=1){
-                    piece[0]=piece_;
                     if(strcmp(piece_,username)==0){
                         int count=0;
                         while( piece_ != NULL ) {
-                        piece_ = strtok(NULL, " ");
-                        if((count==7)&&(strcmp(piece_,password)==0)){
-                            //printf("Nickname:%s and Password:%s match up.",username,password);
-                            return 1;
+                            piece_ = strtok(NULL, " ");
+                            if((count==7)&&(strcmp(piece_,password)==0)){
+                                return 1;
                             }
-                        count++;
+                            count++;
                         }
                     }
                 }
             }
         }
     }
+    sleep(1);
     printf("\nUSERNAME OR PASSWORD IS WRONG!!!\n");
     return 0;
     fclose(checkInf);
@@ -119,18 +127,21 @@ void run_login_screen(){
     printf("Username: \n");scanf("%s",&username);
     printf("Password: \n");scanf("%s",&password);
     if(check_login_info(username,password)==1){
-        printf("\n**** %s ***\n",username);
+        cls;
+        printf("\n*** %s'S LOG IN SCREEN ***\n",username);
     }
     else {
-        sleep(2);
-        main();
+        sleep(1);
+        run_initial_screen();
     }
+    
 }
 
 void run_signup_screen(){
     cls;
     char iban_[8];
     struct Customer *customer = create_customer();
+    struct Account *account = create_account();
 
     printf("\nPlease enter your name:  ");
     scanf("%s",customer->name);
@@ -143,6 +154,7 @@ void run_signup_screen(){
     scanf("%s",customer->username);
 
     if (check_information(customer->username,1)==0){
+        sleep(1);
         printf("You can't use this username [%s].\nPlease pick new one.",customer->username);
         goto re_username;
     }
@@ -152,6 +164,7 @@ void run_signup_screen(){
     scanf("%s",customer->mail);
 
     if (check_information(customer->mail,2)==0){
+        sleep(1);
         printf("You can't use this mail [%s].\nPlease pick new one.",customer->mail);
         goto re_mail;
     }
@@ -161,10 +174,16 @@ void run_signup_screen(){
 
     random_iban(customer,iban_);
     customer->iban = iban_;
-    printf("\nYour special number is:  %s \n",iban_);
-
-    printf("\nCustomer account has been successfully created.\n\n*** WELCOME %s ***",customer->name);
+    account->iban = iban_;
+    account->current_money=0;
+    sleep(0.5);
+    printf("\nYour special number is:  [ %s ] \n",iban_);
+    sleep(1);
+    printf("\nCustomer account has been successfully created.\n\n\t\t*** WELCOME %s %s ***",customer->name,customer->surname);
     store_customer(customer);
+    account_screen(account,iban_);
+    sleep(1);
+    run_initial_screen();
 }
 
 void run_initial_screen(){
@@ -172,25 +191,33 @@ void run_initial_screen(){
     check:
     cls;
     if(invalid_input){
-        printf("1 - Login\n2 - Signup\n\nPlease enter a valid choice.\nChoose one: ");
+        printf("Please enter a valid choice.\n\n[1] - Login\n[2] - Signup\n[q] - Quit\n\nChoose one: ");
     }else{
-        printf("1 - Login\n2 - Signup\n\nChoose one: ");
+        printf("[1] - Login\n[2] - Signup\n[q] - Quit\n\nChoose one: ");
     }
-    int res; 
-    scanf("%d",&res);
+    char res; 
+    scanf("%c",&res);
     switch (res)
     {
-    case 1:
+    case '1':
         run_login_screen();
         break;
-    case 2:
+    case '2':
         run_signup_screen();
         break;
+    case 'q':
+        exit(0);
+        //break;
     default:
         invalid_input = true;
         goto check;
         break;
     }
+}
+
+void account_screen(struct Account *account,char iban_){
+    printf("\nCurrent Money: %.2f\n",account->current_money);
+    printf("\nIban: %s\n",account->iban);
 }
 
 int main(){
